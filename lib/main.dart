@@ -1,6 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:lapor_book/firebase_options.dart';
+import 'package:lapor_book/pages/DashboardPage.dart';
+import 'package:lapor_book/pages/LoginPage.dart';
+import 'package:lapor_book/pages/RegisterPage.dart';
 import 'package:lapor_book/pages/SplashPage.dart';
 
 void main() async {
@@ -11,7 +14,11 @@ void main() async {
     title: "Aplikasi Lapor Book", 
     initialRoute: '/', 
     routes: {
-    '/': (context) => const SplashPage(),
-    // '/login': (context) => LoginPage(),
+      '/': (context) => const SplashPage(),
+      '/login': (context) => LoginPage(),
+      '/register': (context) => const RegisterPage(),
+      '/dashboard': (context) => const DashboardPage(),
+      // '/add': (context) => AddFormPage(),
+      // '/detail': (context) => DetailPage(),
   }));
 }
