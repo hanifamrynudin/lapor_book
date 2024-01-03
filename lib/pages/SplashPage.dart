@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lapor_book/components/styles.dart';
 
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
@@ -18,33 +19,38 @@ class SplashFull extends StatefulWidget {
 }
 
 class _SplashPage extends State<SplashFull> {
-  final _auth = FirebaseAuth.instance;
-
   @override
   void initState() {
     super.initState();
-
-    User? user = _auth.currentUser;
-
-    if (user != null) {
-      Future.delayed(Duration.zero, () {
-        // buat dashboard terlebih dahulu, lalu hapus komen line code dibawah ini
-        //  Navigator.pushReplacementNamed(context, '/dashboard');
-      });
-    } else {
-      Future.delayed(Duration.zero, () {
-        Navigator.pushReplacementNamed(context, '/login');
-      });
-    }
+    checkUserAuthentication();
   }
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return  MaterialApp(
         home: Scaffold(
-      body: Center(
-        child: Text('Selamat datang di Aplikasi Laporan'),
-      ),
-    ));
+          body: Center(
+            child: Text('Aplikasi Lapor Book',
+            style: headerStyle(level: 1),),
+          ),
+        ));
+  }
+
+  void checkUserAuthentication() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+
+      if (user!=null) {
+        Future.delayed(Duration.zero, () {
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        });
+      } else {
+        Future.delayed(Duration.zero, () {
+          Navigator.pushReplacementNamed(context, '/login');
+        });
+      }
+    } catch (e) {
+      print("Error during authentication check: $e");
+    }
   }
 }
