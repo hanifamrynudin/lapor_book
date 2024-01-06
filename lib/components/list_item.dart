@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:lapor_book/models/akun.dart';
 import 'package:intl/intl.dart';
 import 'package:lapor_book/components/styles.dart';
-import 'package:lapor_book/models/akun.dart';
 import 'package:lapor_book/models/laporan.dart';
 
 class ListItem extends StatefulWidget {
@@ -22,24 +22,26 @@ class ListItem extends StatefulWidget {
 
 class _ListItemState extends State<ListItem> {
   final _firestore = FirebaseFirestore.instance;
-  final _storage = FirebaseStorage.instance;
+   final _storage = FirebaseStorage.instance;
 
-  void deleteLaporan() async {
-    try {
-      await _firestore.collection('laporan').doc(widget.laporan.docId).delete();
+   void deleteLaporan() async {
+     try {
+       await _firestore.collection('laporan').doc(widget.laporan.docId).delete();
 
-      if (widget.laporan.gambar != '') {
-        await _storage.refFromURL(widget.laporan.gambar!).delete();
-      }
-      Navigator.popAndPushNamed(context, '/dashboard');
-    } catch (e) {
-      print(e);
-    }
-  }
+ // menghapus gambar dari storage
+       if (widget.laporan.gambar != '') {
+         await _storage.refFromURL(widget.laporan.gambar!).delete();
+       }
+       Navigator.popAndPushNamed(context, '/dashboard');
+     } catch (e) {
+       print(e);
+     }
+   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
+
+@override
+    Widget build(BuildContext context) {
+      return Container(
         decoration: BoxDecoration(
             border: Border.all(width: 2),
             borderRadius: BorderRadius.circular(10)),
@@ -67,7 +69,6 @@ class _ListItemState extends State<ListItem> {
                         TextButton(
                           onPressed: () {
                             deleteLaporan();
-                            Navigator.pop(context);
                           },
                           child: Text('Hapus'),
                         ),
@@ -83,10 +84,9 @@ class _ListItemState extends State<ListItem> {
                       widget.laporan.gambar!,
                       width: 130,
                       height: 130,
-                      fit: BoxFit.cover,
                     )
                   : Image.asset(
-                      'images/placeholder.png',
+                      'assets/istock-default.jpg',
                       width: 130,
                       height: 130,
                     ),
@@ -122,6 +122,7 @@ class _ListItemState extends State<ListItem> {
                   ),
                   Expanded(
                     child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                           color: primaryColor,
                           borderRadius: const BorderRadius.only(
@@ -129,9 +130,8 @@ class _ListItemState extends State<ListItem> {
                           border: const Border.symmetric(
                               vertical: BorderSide(width: 1))),
                       alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Text(
-                        DateFormat('dd/MM/yyyy').format(widget.laporan.tanggal),
+                        widget.laporan.likeCount.toString(), // Convert likeCount to a string
                         style: headerStyle(level: 5, dark: false),
                       ),
                     ),
@@ -140,6 +140,7 @@ class _ListItemState extends State<ListItem> {
               )
             ],
           ),
-        ));
-  }
+        ),
+      );
+    }
 }

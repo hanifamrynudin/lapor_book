@@ -12,7 +12,7 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DashboardFull();
+    return const DashboardFull();
   }
 }
 
@@ -26,9 +26,9 @@ class DashboardFull extends StatefulWidget {
 class _DashboardFull extends State<DashboardFull> {
   int _selectedIndex = 0;
   List<Widget> pages = [];
-
   final _auth = FirebaseAuth.instance;
-  final _db = FirebaseFirestore.instance;
+  final _firestore = FirebaseFirestore.instance;
+  bool _isLoading = false;
 
   Akun akun = Akun(
     uid: '',
@@ -40,8 +40,11 @@ class _DashboardFull extends State<DashboardFull> {
   );
 
   void getAkun() async {
+    setState(() {
+      _isLoading = true;
+    });
     try {
-      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _db
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _firestore
           .collection('akun')
           .where('uid', isEqualTo: _auth.currentUser!.uid)
           .limit(1)
@@ -65,23 +68,28 @@ class _DashboardFull extends State<DashboardFull> {
       final snackbar = SnackBar(content: Text(e.toString()));
       ScaffoldMessenger.of(context).showSnackBar(snackbar);
       print(e);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
+// ... koding setelahnya
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    getAkun();
   }
 
-  @override
   Widget build(BuildContext context) {
-    getAkun();
     pages = <Widget>[
       AllLaporan(akun: akun),
       MyLaporan(akun: akun),
@@ -90,7 +98,7 @@ class _DashboardFull extends State<DashboardFull> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: primaryColor,
-        child: Icon(Icons.add, size: 35),
+        child: const Icon(Icons.add, size: 35),
         onPressed: () {
           Navigator.pushNamed(context, '/add', arguments: {
             'akun': akun,
@@ -124,7 +132,11 @@ class _DashboardFull extends State<DashboardFull> {
           ),
         ],
       ),
-      body: pages.elementAt(_selectedIndex),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : pages.elementAt(_selectedIndex),
     );
   }
 }

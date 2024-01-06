@@ -8,101 +8,83 @@ import 'package:lapor_book/models/laporan.dart';
 
 class MyLaporan extends StatefulWidget {
   final Akun akun;
-  const MyLaporan({super.key, required this.akun});
+  MyLaporan({super.key, required this.akun});
 
   @override
   State<MyLaporan> createState() => _MyLaporanState();
 }
 
 class _MyLaporanState extends State<MyLaporan> {
-  final _db = FirebaseFirestore.instance;
+  final _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
 
-List<Laporan> listLaporan = [];
-
-  void getLaporan() async{
+  List<Laporan> listLaporan = [];
+  void getTransaksi() async {
     try {
-      QuerySnapshot<Map<String,dynamic>> querySnapshot = 
-      await _db.collection('laporan').where('uid', isEqualTo: widget.akun.uid)
-      .get(); 
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _firestore
+          .collection('laporan')
+          .where('uid',
+              isEqualTo: _auth.currentUser!
+                  .uid) // kondisi untuk menccari laporan yang sesuai dengan akun yang telah login
+          .get();
 
       setState(() {
         listLaporan.clear();
-        for (var documents in querySnapshot.docs){
-          listLaporan.add(Laporan(
-            uid: documents.data()['uid'],
-            docId:documents.data()['docId'],
-            judul: documents.data()['judul'], 
-            instansi:documents.data()['instansi'], 
-            nama: documents.data()['nama'], 
-            status: documents.data()['status'], 
-            tanggal: documents.data()['tanggal'].toDate(), 
-            maps: documents.data()['maps'],
-            deskripsi: documents.data()['deskripsi'],
-            gambar: documents.data()['gambar']
-            ),
+        for (var documents in querySnapshot.docs) {
+          List<dynamic>? komentarData = documents.data()['komentar'];
+
+          List<Komentar>? listKomentar = komentarData?.map((map) {
+            return Komentar(
+              nama: map['nama'],
+              isi: map['isi'],
             );
+          }).toList();
+          listLaporan.add(
+            Laporan(
+              uid: documents.data()['uid'],
+              docId: documents.data()['docId'],
+              judul: documents.data()['judul'],
+              instansi: documents.data()['instansi'],
+              deskripsi: documents.data()['deskripsi'],
+              nama: documents.data()['nama'],
+              status: documents.data()['status'],
+              gambar: documents.data()['gambar'],
+              tanggal: documents['tanggal'].toDate(),
+              maps: documents.data()['maps'],
+              likeCount: documents.data()['likeCount'].toString(),
+              komentar: listKomentar,
+            ),
+          );
         }
       });
     } catch (e) {
-      print(e); 
+      print(e);
     }
   }
-   @override
-Widget build(BuildContext context) {
-  getLaporan();
 
-  return SafeArea(
-    child: Container(
-      margin: const EdgeInsets.all(20),
-      child: 
-      // listLaporan.isEmpty
-          // ? 
-          const Center(
-              child: Text(
-                'My Data',
-                style: TextStyle(fontSize: 18),
-              ),
-            )
-          // : GridView.builder(
-          //     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          //       crossAxisCount: 2,
-          //       crossAxisSpacing: 10,
-          //       mainAxisSpacing: 10,
-          //       childAspectRatio: 1 / 1.233,
-          //     ),
-          //     itemCount: listLaporan.length,
-          //     itemBuilder: (context, index) {
-          //       return ListItem(
-          //         akun: widget.akun,
-          //         laporan: listLaporan[index],
-          //         isLaporanku: false,
-          //       );
-          //     },
-          //   ),
-    ),
-  );
-}
-  // @override
-  // Widget build(BuildContext context) {
-  //   getLaporan();
-  //   return SafeArea(
-  //     child: Container(
-  //       margin: EdgeInsets.all(20),
-  //       child: GridView.builder(
-  //         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-  //           crossAxisCount: 2, 
-  //           crossAxisSpacing: 10,
-  //           mainAxisSpacing:10,
-  //           childAspectRatio: 1/ 1.233 ),
-  //         itemCount: listLaporan.length,
-  //         itemBuilder: (context, index){
-  //           return ListItem(
-  //             akun: widget.akun,
-  //             laporan: listLaporan[index],
-  //             isLaporanku: true,
-  //           );
-  //         })
-  //       ),
-  //     );
-  // }
+  @override
+  Widget build(BuildContext context) {
+    getTransaksi();
+    return SafeArea(
+      child: Container(
+        width: double.infinity,
+        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 1 / 1.234,
+            ),
+            itemCount: listLaporan.length,
+            itemBuilder: (context, index) {
+              return ListItem(
+                laporan: listLaporan[index],
+                akun: widget.akun,
+                isLaporanku: true,
+              );
+            }),
+      ),
+    );
+  }
 }

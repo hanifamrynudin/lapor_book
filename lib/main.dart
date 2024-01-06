@@ -10,17 +10,28 @@ import 'package:lapor_book/pages/SplashPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MainApp());
+}
 
-  runApp(MaterialApp(
-    title: "Aplikasi Lapor Book", 
-    initialRoute: '/', 
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Lapor Book',
+    initialRoute: '/',
     routes: {
       '/': (context) => const SplashPage(),
-      '/login': (context) => LoginPage(),
+      '/login': (context) => const LoginPage(),
       '/register': (context) => const RegisterPage(),
       '/dashboard': (context) => const DashboardPage(),
-      '/add': (context) => const AddFormPage(),
+      '/add': (context) => AddFormPage(),
       '/detail': (context) => const DetailPage(),
-  }));
+    },
+    );
+  }
 }

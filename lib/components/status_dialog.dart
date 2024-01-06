@@ -7,10 +7,13 @@ import 'package:lapor_book/models/laporan.dart';
 
 class StatusDialog extends StatefulWidget {
   final Laporan laporan;
-  const StatusDialog({required this.laporan});
+
+  const StatusDialog({
+    required this.laporan,
+  });
 
   @override
-  State<StatusDialog> createState() => _StatusDialogState();
+  _StatusDialogState createState() => _StatusDialogState();
 }
 
 class _StatusDialogState extends State<StatusDialog> {
